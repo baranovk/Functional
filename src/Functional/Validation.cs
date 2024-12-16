@@ -57,7 +57,7 @@ public readonly struct Validation<T>
     public Unit Match(Action<IEnumerable<ValidationError>> Invalid, Action<T> Valid)
        => Match(Invalid.ToFunc(), Valid.ToFunc());
 
-    public IEnumerator<T> AsEnumerable()
+    public IEnumerable<T> AsEnumerable()
     {
         if (IsValid) { yield return Value!; }
     }
