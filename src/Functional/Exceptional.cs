@@ -30,9 +30,6 @@ public readonly struct Exceptional<T>
         Exception = default;
     }
 
-    public static implicit operator Exceptional<T>(Exception ex) => new(ex);
-    public static implicit operator Exceptional<T>(T t) => new(t);
-
     public TR Match<TR>(Func<Exception, TR> Exception, Func<T, TR> Success)
        => IsException ? Exception(this.Exception!) : Success(Value!);
 
@@ -43,6 +40,9 @@ public readonly struct Exceptional<T>
        => Match(
           ex => $"Exception({ex.Message})",
           t => $"Success({t})");
+
+    public static implicit operator Exceptional<T>(Exception ex) => new(ex);
+    public static implicit operator Exceptional<T>(T t) => new(t);
 }
 
 public static class Exceptional
