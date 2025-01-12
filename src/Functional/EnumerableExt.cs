@@ -26,6 +26,7 @@ public static class EnumerableExt
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1851:Possible multiple enumerations of 'IEnumerable' collection", Justification = "<Pending>")]
     public static (IEnumerable<T> Passed, IEnumerable<T> Failed) Partition<T>
     (
        this IEnumerable<T> source,
@@ -33,6 +34,7 @@ public static class EnumerableExt
     )
     {
         var grouped = source.GroupBy(predicate);
+
         return
         (
            Passed: grouped.Where(g => g.Key).FirstOrDefault(Enumerable.Empty<T>()),
@@ -47,23 +49,23 @@ public static class EnumerableExt
        (this IEnumerable<T> ts, Action<T> action)
        => ts.Map(action.ToFunc()).ToImmutableList();
 
-    public static IEnumerable<R> Map_InTermsOfFold<T, R>
-       (this IEnumerable<T> ts, Func<T, R> f)
-        => ts.Aggregate(List<R>()
+    public static IEnumerable<TR> MapInTermsOfFold<T, TR>
+       (this IEnumerable<T> ts, Func<T, TR> f)
+        => ts.Aggregate(List<TR>()
            , (rs, t) => rs.Append(f(t)));
 
-    public static IEnumerable<T> Where_InTermsOfFold<T>
+    public static IEnumerable<T> WhereInTermsOfFold<T>
        (this IEnumerable<T> @this, Func<T, bool> predicate)
         => @this.Aggregate(List<T>()
            , (ts, t) => predicate(t) ? ts.Append(t) : ts);
 
-    public static IEnumerable<R> Bind_InTermsOfFold<T, R>
-       (this IEnumerable<T> ts, Func<T, IEnumerable<R>> f)
-       => ts.Aggregate(List<R>()
+    public static IEnumerable<TR> BindInTermsOfFold<T, TR>
+       (this IEnumerable<T> ts, Func<T, IEnumerable<TR>> f)
+       => ts.Aggregate(List<TR>()
           , (rs, t) => rs.Concat(f(t)));
 
-    public static R Match<T, R>(this IEnumerable<T> list
-       , Func<R> Empty, Func<T, IEnumerable<T>, R> Otherwise)
+    public static TR Match<T, TR>(this IEnumerable<T> list
+       , Func<TR> Empty, Func<T, IEnumerable<T>, TR> Otherwise)
        => list.Head().Match(
           None: Empty,
           Some: head => Otherwise(head, list.Skip(1)));
@@ -76,21 +78,17 @@ public static class EnumerableExt
         return enumerator.MoveNext() ? Some(enumerator.Current) : None;
     }
 
-    public static IEnumerable<Func<T2, R>> Map<T1, T2, R>(this IEnumerable<T1> list
-       , Func<T1, T2, R> func)
-       => list.Map(func.Curry());
+    public static IEnumerable<Func<T2, TR>> Map<T1, T2, TR>(this IEnumerable<T1> list, Func<T1, T2, TR> func) => list.Map(func.Curry());
 
-    public static IEnumerable<R> Map<T, R>
-       (this IEnumerable<T> list, Func<T, R> func)
-        => list.Select(func);
+    public static IEnumerable<TR> Map<T, TR>(this IEnumerable<T> list, Func<T, TR> func) => list.Select(func);
 
-    public static IEnumerable<Func<T2, Func<T3, R>>> Map<T1, T2, T3, R>(this IEnumerable<T1> opt, Func<T1, T2, T3, R> func)
+    public static IEnumerable<Func<T2, Func<T3, TR>>> Map<T1, T2, T3, TR>(this IEnumerable<T1> opt, Func<T1, T2, T3, TR> func)
        => opt.Map(func.Curry());
 
-    public static IEnumerable<R> Bind<T, R>(this IEnumerable<T> list, Func<T, IEnumerable<R>> func)
+    public static IEnumerable<TR> Bind<T, TR>(this IEnumerable<T> list, Func<T, IEnumerable<TR>> func)
         => list.SelectMany(func);
 
-    public static IEnumerable<R> Bind<T, R>(this IEnumerable<T> list, Func<T, Option<R>> func)
+    public static IEnumerable<TR> Bind<T, TR>(this IEnumerable<T> list, Func<T, Option<TR>> func)
         => list.Bind(t => func(t).AsEnumerable());
 
     public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> list)
@@ -98,10 +96,10 @@ public static class EnumerableExt
 
     // LINQ
 
-    public static IEnumerable<RR> SelectMany<T, R, RR>
+    public static IEnumerable<TRR> SelectMany<T, TR, TRR>
        (this IEnumerable<T> source,
-        Func<T, Option<R>> bind,
-        Func<T, R, RR> project)
+        Func<T, Option<TR>> bind,
+        Func<T, TR, TRR> project)
        => from t in source
           let opt = bind(t)
           where opt.IsSome()
@@ -124,7 +122,7 @@ public static class EnumerableExt
 
     public static IEnumerable<T> DropWhile<T>(this IEnumerable<T> @this, Func<T, bool> pred)
     {
-        bool clean = true;
+        var clean = true;
         foreach (var item in @this)
         {
             if (!clean || !pred(item))

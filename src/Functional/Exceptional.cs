@@ -1,4 +1,4 @@
-﻿using Unit = System.ValueTuple;
+using Unit = System.ValueTuple;
 
 namespace Functional;
 
@@ -52,95 +52,95 @@ public static class Exceptional
     public static Func<T, Exceptional<T>> Return<T>()
        => t => t;
 
-    public static Exceptional<R> Of<R>(Exception left) => new(left);
+    public static Exceptional<TR> Of<TR>(Exception left) => new(left);
 
-    public static Exceptional<R> Of<R>(R right) => new(right);
+    public static Exceptional<TR> Of<TR>(TR right) => new(right);
 
     // applicative
 
-    public static Exceptional<R> Apply<T, R>
-       (this Exceptional<Func<T, R>> @this, Exceptional<T> arg)
+    public static Exceptional<TR> Apply<T, TR>
+       (this Exceptional<Func<T, TR>> @this, Exceptional<T> arg)
        => @this.Match(
           Exception: ex => ex,
           Success: func => arg.Match(
              Exception: ex => ex,
              Success: t => F.Exceptional(func(t))));
 
-    public static Exceptional<Func<T2, R>> Apply<T1, T2, R>
-       (this Exceptional<Func<T1, T2, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, TR>> Apply<T1, T2, TR>
+       (this Exceptional<Func<T1, T2, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.Curry), arg);
 
-    public static Exceptional<Func<T2, T3, R>> Apply<T1, T2, T3, R>
-       (this Exceptional<Func<T1, T2, T3, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, T3, TR>> Apply<T1, T2, T3, TR>
+       (this Exceptional<Func<T1, T2, T3, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Exceptional<Func<T2, T3, T4, R>> Apply<T1, T2, T3, T4, R>
-       (this Exceptional<Func<T1, T2, T3, T4, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, T3, T4, TR>> Apply<T1, T2, T3, T4, TR>
+       (this Exceptional<Func<T1, T2, T3, T4, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Exceptional<Func<T2, T3, T4, T5, R>> Apply<T1, T2, T3, T4, T5, R>
-       (this Exceptional<Func<T1, T2, T3, T4, T5, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, T3, T4, T5, TR>> Apply<T1, T2, T3, T4, T5, TR>
+       (this Exceptional<Func<T1, T2, T3, T4, T5, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Exceptional<Func<T2, T3, T4, T5, T6, R>> Apply<T1, T2, T3, T4, T5, T6, R>
-       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, T3, T4, T5, T6, TR>> Apply<T1, T2, T3, T4, T5, T6, TR>
+       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Exceptional<Func<T2, T3, T4, T5, T6, T7, R>> Apply<T1, T2, T3, T4, T5, T6, T7, R>
-       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, T7, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, T3, T4, T5, T6, T7, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, TR>
+       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, T7, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Exceptional<Func<T2, T3, T4, T5, T6, T7, T8, R>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, R>
-       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, T7, T8, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, T3, T4, T5, T6, T7, T8, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, TR>
+       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, T7, T8, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Exceptional<Func<T2, T3, T4, T5, T6, T7, T8, T9, R>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>
-       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>> @this, Exceptional<T1> arg)
+    public static Exceptional<Func<T2, T3, T4, T5, T6, T7, T8, T9, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>
+       (this Exceptional<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>> @this, Exceptional<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
     // functor
 
-    public static Exceptional<RR> Map<R, RR>
+    public static Exceptional<TRR> Map<TR, TRR>
     (
-       this Exceptional<R> @this,
-       Func<R, RR> f
+       this Exceptional<TR> @this,
+       Func<TR, TRR> f
     )
     => @this.Match
     (
-       Exception: ex => new Exceptional<RR>(ex),
+       Exception: ex => new Exceptional<TRR>(ex),
        Success: r => f(r)
     );
 
-    public static Exceptional<Unit> ForEach<R>(this Exceptional<R> @this, Action<R> act)
+    public static Exceptional<Unit> ForEach<TR>(this Exceptional<TR> @this, Action<TR> act)
        => Map(@this, act.ToFunc());
 
-    public static Exceptional<RR> Bind<R, RR>
+    public static Exceptional<TRR> Bind<TR, TRR>
     (
-       this Exceptional<R> @this,
-       Func<R, Exceptional<RR>> f
+       this Exceptional<TR> @this,
+       Func<TR, Exceptional<TRR>> f
     )
     => @this.Match
     (
-       Exception: ex => new Exceptional<RR>(ex),
+       Exception: ex => new Exceptional<TRR>(ex),
        Success: r => f(r)
     );
 
     // LINQ
 
-    public static Exceptional<R> Select<T, R>(this Exceptional<T> @this, Func<T, R> map) => @this.Map(map);
+    public static Exceptional<TR> Select<T, TR>(this Exceptional<T> @this, Func<T, TR> map) => @this.Map(map);
 
-    public static Exceptional<RR> SelectMany<T, R, RR>
+    public static Exceptional<TRR> SelectMany<T, TR, TRR>
     (
        this Exceptional<T> @this,
-       Func<T, Exceptional<R>> bind,
-       Func<T, R, RR> project
+       Func<T, Exceptional<TR>> bind,
+       Func<T, TR, TRR> project
     )
     => @this.Match
     (
-       Exception: ex => new Exceptional<RR>(ex),
+       Exception: ex => new Exceptional<TRR>(ex),
        Success: t => bind(t).Match
        (
-          Exception: ex => new Exceptional<RR>(ex),
+          Exception: ex => new Exceptional<TRR>(ex),
           Success: r => project(t, r)
        )
     );

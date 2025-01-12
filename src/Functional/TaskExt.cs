@@ -11,89 +11,89 @@ public static partial class F
 
 public static class TaskExt
 {
-    public static async Task<R> Apply<T, R>
-       (this Task<Func<T, R>> f, Task<T> arg)
+    public static async Task<TR> Apply<T, TR>
+       (this Task<Func<T, TR>> f, Task<T> arg)
        //=> (await f)(await arg); // simple version, less efficient
        => (await f.ConfigureAwait(false))(await arg.ConfigureAwait(false)); // ConfigureAwait(false) more efficient, but not for UI-thread apps
 
-    public static Task<Func<T2, R>> Apply<T1, T2, R>
-       (this Task<Func<T1, T2, R>> f, Task<T1> arg)
+    public static Task<Func<T2, TR>> Apply<T1, T2, TR>
+       (this Task<Func<T1, T2, TR>> f, Task<T1> arg)
        => Apply(f.Map(F.Curry), arg);
 
-    public static Task<Func<T2, T3, R>> Apply<T1, T2, T3, R>
-       (this Task<Func<T1, T2, T3, R>> @this, Task<T1> arg)
+    public static Task<Func<T2, T3, TR>> Apply<T1, T2, T3, TR>
+       (this Task<Func<T1, T2, T3, TR>> @this, Task<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Task<Func<T2, T3, T4, R>> Apply<T1, T2, T3, T4, R>
-       (this Task<Func<T1, T2, T3, T4, R>> @this, Task<T1> arg)
+    public static Task<Func<T2, T3, T4, TR>> Apply<T1, T2, T3, T4, TR>
+       (this Task<Func<T1, T2, T3, T4, TR>> @this, Task<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Task<Func<T2, T3, T4, T5, R>> Apply<T1, T2, T3, T4, T5, R>
-       (this Task<Func<T1, T2, T3, T4, T5, R>> @this, Task<T1> arg)
+    public static Task<Func<T2, T3, T4, T5, TR>> Apply<T1, T2, T3, T4, T5, TR>
+       (this Task<Func<T1, T2, T3, T4, T5, TR>> @this, Task<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Task<Func<T2, T3, T4, T5, T6, R>> Apply<T1, T2, T3, T4, T5, T6, R>
-       (this Task<Func<T1, T2, T3, T4, T5, T6, R>> @this, Task<T1> arg)
+    public static Task<Func<T2, T3, T4, T5, T6, TR>> Apply<T1, T2, T3, T4, T5, T6, TR>
+       (this Task<Func<T1, T2, T3, T4, T5, T6, TR>> @this, Task<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Task<Func<T2, T3, T4, T5, T6, T7, R>> Apply<T1, T2, T3, T4, T5, T6, T7, R>
-       (this Task<Func<T1, T2, T3, T4, T5, T6, T7, R>> @this, Task<T1> arg)
+    public static Task<Func<T2, T3, T4, T5, T6, T7, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, TR>
+       (this Task<Func<T1, T2, T3, T4, T5, T6, T7, TR>> @this, Task<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, R>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, R>
-       (this Task<Func<T1, T2, T3, T4, T5, T6, T7, T8, R>> @this, Task<T1> arg)
+    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, TR>
+       (this Task<Func<T1, T2, T3, T4, T5, T6, T7, T8, TR>> @this, Task<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, T9, R>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>
-       (this Task<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>> @this, Task<T1> arg)
+    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, T9, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>
+       (this Task<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>> @this, Task<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static async Task<R> Map<T, R>
-       (this Task<T> task, Func<T, R> f)
+    public static async Task<TR> Map<T, TR>
+       (this Task<T> task, Func<T, TR> f)
        //=> f(await task);
        => f(await task.ConfigureAwait(false));
 
-    public static async Task<R> Map<R>
-       (this Task task, Func<R> f)
+    public static async Task<TR> Map<TR>
+       (this Task task, Func<TR> f)
     {
         await task.ConfigureAwait(false);
         return f();
     }
 
-    public static Task<Func<T2, R>> Map<T1, T2, R>
-       (this Task<T1> @this, Func<T1, T2, R> func)
+    public static Task<Func<T2, TR>> Map<T1, T2, TR>
+       (this Task<T1> @this, Func<T1, T2, TR> func)
         => @this.Map(func.Curry());
 
-    public static Task<Func<T2, T3, R>> Map<T1, T2, T3, R>
-       (this Task<T1> @this, Func<T1, T2, T3, R> func)
+    public static Task<Func<T2, T3, TR>> Map<T1, T2, T3, TR>
+       (this Task<T1> @this, Func<T1, T2, T3, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static Task<Func<T2, T3, T4, R>> Map<T1, T2, T3, T4, R>
-       (this Task<T1> @this, Func<T1, T2, T3, T4, R> func)
+    public static Task<Func<T2, T3, T4, TR>> Map<T1, T2, T3, T4, TR>
+       (this Task<T1> @this, Func<T1, T2, T3, T4, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static Task<Func<T2, T3, T4, T5, R>> Map<T1, T2, T3, T4, T5, R>
-       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, R> func)
+    public static Task<Func<T2, T3, T4, T5, TR>> Map<T1, T2, T3, T4, T5, TR>
+       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static Task<Func<T2, T3, T4, T5, T6, R>> Map<T1, T2, T3, T4, T5, T6, R>
-       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, R> func)
+    public static Task<Func<T2, T3, T4, T5, T6, TR>> Map<T1, T2, T3, T4, T5, T6, TR>
+       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static Task<Func<T2, T3, T4, T5, T6, T7, R>> Map<T1, T2, T3, T4, T5, T6, T7, R>
-       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, T7, R> func)
+    public static Task<Func<T2, T3, T4, T5, T6, T7, TR>> Map<T1, T2, T3, T4, T5, T6, T7, TR>
+       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, T7, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, R>> Map<T1, T2, T3, T4, T5, T6, T7, T8, R>
-       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, T7, T8, R> func)
+    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, TR>> Map<T1, T2, T3, T4, T5, T6, T7, T8, TR>
+       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, T7, T8, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, T9, R>> Map<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>
-       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> func)
+    public static Task<Func<T2, T3, T4, T5, T6, T7, T8, T9, TR>> Map<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>
+       (this Task<T1> @this, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static Task<R> Map<T, R>
-       (this Task<T> task, Func<Exception, R> Faulted, Func<T, R> Completed)
+    public static Task<TR> Map<T, TR>
+       (this Task<T> task, Func<Exception, TR> Faulted, Func<T, TR> Completed)
        => task.ContinueWith(t =>
              t.Status == TaskStatus.Faulted
                 ? Faulted(t.Exception!)
@@ -103,7 +103,7 @@ public static class TaskExt
         => @this.ContinueWith(t => continuation.ToFunc()(t.Result),
             cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
 
-    public static async Task<R> Bind<T, R>(this Task<T> task, Func<T, Task<R>> f)
+    public static async Task<TR> Bind<T, TR>(this Task<T> task, Func<T, Task<TR>> f)
         => await f(await task.ConfigureAwait(false)).ConfigureAwait(false);
 
     public static Task<T> OrElse<T>
@@ -132,34 +132,34 @@ public static class TaskExt
 
     // LINQ
 
-    public static async Task<RR> SelectMany<T, R, RR>
-       (this Task<T> task, Func<T, Task<R>> bind, Func<T, R, RR> project)
+    public static async Task<TRR> SelectMany<T, TR, TRR>
+       (this Task<T> task, Func<T, Task<TR>> bind, Func<T, TR, TRR> project)
     {
         var t = await task.ConfigureAwait(false);
         var r = await bind(t).ConfigureAwait(false);
         return project(t, r);
     }
 
-    public static async Task<RR> SelectMany<T, R, RR>
-       (this Task<T> task, Func<T, ValueTask<R>> bind, Func<T, R, RR> project)
+    public static async Task<TRR> SelectMany<T, TR, TRR>
+       (this Task<T> task, Func<T, ValueTask<TR>> bind, Func<T, TR, TRR> project)
     {
         var t = await task.ConfigureAwait(false);
         var r = await bind(t).ConfigureAwait(false);
         return project(t, r);
     }
 
-    public static async Task<RR> SelectMany<R, RR>
-       (this Task task, Func<Unit, Task<R>> bind, Func<Unit, R, RR> project)
+    public static async Task<TRR> SelectMany<TR, TRR>
+       (this Task task, Func<Unit, Task<TR>> bind, Func<Unit, TR, TRR> project)
     {
         await task.ConfigureAwait(false);
         var r = await bind(Unit()).ConfigureAwait(false);
         return project(Unit(), r);
     }
 
-    public static async Task<R> SelectMany<T, R>(this Task<T> task, Func<T, Task<R>> f)
+    public static async Task<TR> SelectMany<T, TR>(this Task<T> task, Func<T, Task<TR>> f)
        => await f(await task.ConfigureAwait(false)).ConfigureAwait(false);
 
-    public static async Task<R> Select<T, R>(this Task<T> task, Func<T, R> f)
+    public static async Task<TR> Select<T, TR>(this Task<T> task, Func<T, TR> f)
        => f(await task.ConfigureAwait(false));
 
     public static async Task<T> Where<T>(this Task<T> source, Func<T, bool> predicate)
@@ -174,30 +174,33 @@ public static class TaskExt
         return t;
     }
 
-    public static async Task<V> Join<T, U, K, V>(
-        this Task<T> source, Task<U> inner,
-        Func<T, K> outerKeySelector, Func<U, K> innerKeySelector,
-        Func<T, U, V> resultSelector)
+    public static async Task<TV> Join<T, TU, TK, TV>(
+        this Task<T> source, Task<TU> inner,
+        Func<T, TK> outerKeySelector, Func<TU, TK> innerKeySelector,
+        Func<T, TU, TV> resultSelector)
     {
         await Task.WhenAll(source, inner).ConfigureAwait(false);
 
-        if (!EqualityComparer<K>.Default.Equals(outerKeySelector(source.Result), innerKeySelector(inner.Result)))
+        var sr = await source.ConfigureAwait(false);
+        var ir = await inner.ConfigureAwait(false);
+
+        if (!EqualityComparer<TK>.Default.Equals(outerKeySelector(sr), innerKeySelector(ir)))
         {
             throw new OperationCanceledException();
         }
 
-        return resultSelector(source.Result, inner.Result);
+        return resultSelector(sr, ir);
     }
 
-    public static async Task<V> GroupJoin<T, U, K, V>(
-        this Task<T> source, Task<U> inner,
-        Func<T, K> outerKeySelector, Func<U, K> innerKeySelector,
-        Func<T, Task<U>, V> resultSelector)
+    public static async Task<TV> GroupJoin<T, TU, TK, TV>(
+        this Task<T> source, Task<TU> inner,
+        Func<T, TK> outerKeySelector, Func<TU, TK> innerKeySelector,
+        Func<T, Task<TU>, TV> resultSelector)
     {
         var t = await source.ConfigureAwait(false);
 
         return resultSelector(t,
-            inner.Where(u => EqualityComparer<K>.Default.Equals(
+            inner.Where(u => EqualityComparer<TK>.Default.Equals(
                 outerKeySelector(t), innerKeySelector(u))));
     }
 }

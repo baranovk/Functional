@@ -18,7 +18,7 @@ public static partial class F
 // a NoneType can be implicitely converted to an Option<T> for any type T
 public struct NoneType { }
 
-public struct Option<T> : IEquatable<NoneType>, IEquatable<Option<T>>
+public readonly struct Option<T> : IEquatable<NoneType>, IEquatable<Option<T>>
 {
     private readonly T? _value;
     private readonly bool _isSome;
@@ -31,8 +31,7 @@ public struct Option<T> : IEquatable<NoneType>, IEquatable<Option<T>>
     public static implicit operator Option<T>(T t)
        => t is null ? None : new Option<T>(t);
 
-    public R Match<R>(Func<R> None, Func<T, R> Some)
-       => _isSome ? Some(_value!) : None();
+    public TR Match<TR>(Func<TR> None, Func<T, TR> Some) => _isSome ? Some(_value!) : None();
 
     public IEnumerable<T> AsEnumerable()
     {
@@ -40,104 +39,104 @@ public struct Option<T> : IEquatable<NoneType>, IEquatable<Option<T>>
     }
 
     public static bool operator true(Option<T> @this) => @this._isSome;
+
     public static bool operator false(Option<T> @this) => @this._isNone;
+
     public static Option<T> operator |(Option<T> l, Option<T> r) => l._isSome ? l : r;
 
     // equality operators
 
-    public bool Equals(Option<T> other)
-       => _isSome == other._isSome
-       && (_isNone || _value!.Equals(other._value));
+    public bool Equals(Option<T> other) => _isSome == other._isSome && (_isNone || _value!.Equals(other._value));
 
     public bool Equals(NoneType other) => _isNone;
 
     public override bool Equals(object? obj) => obj is Option<T> option && Equals(option);
 
     public static bool operator ==(Option<T> @this, Option<T> other) => @this.Equals(other);
+
     public static bool operator !=(Option<T> @this, Option<T> other) => !(@this == other);
 
-    public override int GetHashCode()
-       => _isNone ? 0 : _value!.GetHashCode();
+    public override int GetHashCode() => _isNone ? 0 : _value!.GetHashCode();
 
     public override string ToString() => _isSome ? $"Some({_value})" : "None";
 }
 
 public static class OptionExt
 {
-    public static Option<R> Apply<T, R>
-       (this Option<Func<T, R>> @this, Option<T> arg)
+    public static Option<TR> Apply<T, TR>
+       (this Option<Func<T, TR>> @this, Option<T> arg)
        => @this.Match(
           () => None,
           (func) => arg.Match(
              () => None,
              (val) => Some(func(val))));
 
-    public static Option<Func<T2, R>> Apply<T1, T2, R>
-       (this Option<Func<T1, T2, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, TR>> Apply<T1, T2, TR>
+       (this Option<Func<T1, T2, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.Curry), arg);
 
-    public static Option<Func<T2, T3, R>> Apply<T1, T2, T3, R>
-       (this Option<Func<T1, T2, T3, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, T3, TR>> Apply<T1, T2, T3, TR>
+       (this Option<Func<T1, T2, T3, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Option<Func<T2, T3, T4, R>> Apply<T1, T2, T3, T4, R>
-       (this Option<Func<T1, T2, T3, T4, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, T3, T4, TR>> Apply<T1, T2, T3, T4, TR>
+       (this Option<Func<T1, T2, T3, T4, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Option<Func<T2, T3, T4, T5, R>> Apply<T1, T2, T3, T4, T5, R>
-       (this Option<Func<T1, T2, T3, T4, T5, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, T3, T4, T5, TR>> Apply<T1, T2, T3, T4, T5, TR>
+       (this Option<Func<T1, T2, T3, T4, T5, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Option<Func<T2, T3, T4, T5, T6, R>> Apply<T1, T2, T3, T4, T5, T6, R>
-       (this Option<Func<T1, T2, T3, T4, T5, T6, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, T3, T4, T5, T6, TR>> Apply<T1, T2, T3, T4, T5, T6, TR>
+       (this Option<Func<T1, T2, T3, T4, T5, T6, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Option<Func<T2, T3, T4, T5, T6, T7, R>> Apply<T1, T2, T3, T4, T5, T6, T7, R>
-       (this Option<Func<T1, T2, T3, T4, T5, T6, T7, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, T3, T4, T5, T6, T7, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, TR>
+       (this Option<Func<T1, T2, T3, T4, T5, T6, T7, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Option<Func<T2, T3, T4, T5, T6, T7, T8, R>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, R>
-       (this Option<Func<T1, T2, T3, T4, T5, T6, T7, T8, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, T3, T4, T5, T6, T7, T8, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, TR>
+       (this Option<Func<T1, T2, T3, T4, T5, T6, T7, T8, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Option<Func<T2, T3, T4, T5, T6, T7, T8, T9, R>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>
-       (this Option<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>> @this, Option<T1> arg)
+    public static Option<Func<T2, T3, T4, T5, T6, T7, T8, T9, TR>> Apply<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>
+       (this Option<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>> @this, Option<T1> arg)
        => Apply(@this.Map(F.CurryFirst), arg);
 
-    public static Option<R> Bind<T, R>
-       (this Option<T> optT, Func<T, Option<R>> f)
+    public static Option<TR> Bind<T, TR>
+       (this Option<T> optT, Func<T, Option<TR>> f)
         => optT.Match(
            () => None,
            (t) => f(t));
 
-    public static IEnumerable<R> Bind<T, R>
-       (this Option<T> @this, Func<T, IEnumerable<R>> func)
+    public static IEnumerable<TR> Bind<T, TR>
+       (this Option<T> @this, Func<T, IEnumerable<TR>> func)
         => @this.AsEnumerable().Bind(func);
 
     public static Option<Unit> ForEach<T>(this Option<T> @this, Action<T> action)
        => Map(@this, action.ToFunc());
 
-    public static Option<R> Map<T, R>
-       (this NoneType _, Func<T, R> f)
+    public static Option<TR> Map<T, TR>
+       (this NoneType _, Func<T, TR> f)
        => None;
 
-    public static Option<R> Map<T, R>
-       (this Option<T> optT, Func<T, R> f)
+    public static Option<TR> Map<T, TR>
+       (this Option<T> optT, Func<T, TR> f)
        => optT.Match(
           () => None,
           (t) => Some(f(t)));
 
-    public static Option<Func<T2, R>> Map<T1, T2, R>
-       (this Option<T1> @this, Func<T1, T2, R> func)
+    public static Option<Func<T2, TR>> Map<T1, T2, TR>
+       (this Option<T1> @this, Func<T1, T2, TR> func)
         => @this.Map(func.Curry());
 
-    public static Option<Func<T2, T3, R>> Map<T1, T2, T3, R>
-       (this Option<T1> @this, Func<T1, T2, T3, R> func)
+    public static Option<Func<T2, T3, TR>> Map<T1, T2, T3, TR>
+       (this Option<T1> @this, Func<T1, T2, T3, TR> func)
         => @this.Map(func.CurryFirst());
 
-    public static IEnumerable<Option<R>> Traverse<T, R>(this Option<T> @this, Func<T, IEnumerable<R>> func)
+    public static IEnumerable<Option<TR>> Traverse<T, TR>(this Option<T> @this, Func<T, IEnumerable<TR>> func)
        => @this.Match(
-          () => List((Option<R>)None),
+          () => List((Option<TR>)None),
           (t) => func(t).Map(r => Some(r)));
 
     // utilities
@@ -192,7 +191,7 @@ public static class OptionExt
 
     // LINQ
 
-    public static Option<R> Select<T, R>(this Option<T> @this, Func<T, R> func)
+    public static Option<TR> Select<T, TR>(this Option<T> @this, Func<T, TR> func)
        => @this.Map(func);
 
     public static Option<T> Where<T>
@@ -201,8 +200,8 @@ public static class OptionExt
           () => None,
           (t) => predicate(t) ? optT : None);
 
-    public static Option<RR> SelectMany<T, R, RR>
-       (this Option<T> opt, Func<T, Option<R>> bind, Func<T, R, RR> project)
+    public static Option<TRR> SelectMany<T, TR, TRR>
+       (this Option<T> opt, Func<T, Option<TR>> bind, Func<T, TR, TRR> project)
        => opt.Match(
           () => None,
           (t) => bind(t).Match(
