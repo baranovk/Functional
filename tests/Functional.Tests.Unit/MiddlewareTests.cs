@@ -11,10 +11,7 @@ internal sealed class MiddlewareTests
     private const int FinishExceptionalValue = 20;
 
     [SetUp]
-    public void Setup()
-    {
-        _sideEffects = [];
-    }
+    public void Setup() => _sideEffects = [];
 
     [Test]
     public void Middleware_With_Exceptional_Should_RunInRightOrder()
