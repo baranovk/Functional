@@ -9,6 +9,7 @@ internal sealed class MiddlewareTests
     private List<string> _sideEffects;
     private const int InitExceptionalValue = 10;
     private const int FinishExceptionalValue = 20;
+    private const string TestErrorMessage = "TEST ERROR";
 
     [SetUp]
     public void Setup() => _sideEffects = [];
@@ -67,13 +68,13 @@ internal sealed class MiddlewareTests
     }
 
     [Test]
-    public async Task AsyncMiddleware_With_Exceptional_Should_RunInRightOrder()
+    public async Task AsyncMiddleware_With_ExceptionalWithValue_Should_RunInRightOrder()
     {
         AsyncMiddleware<Exceptional<int>> mw0 = async (next) =>
         {
             _sideEffects.Add("Middleware0");
 
-            return await (await GetExceptionalAsync().ConfigureAwait(false))
+            return await (await GetExceptionalWithValueAsync().ConfigureAwait(false))
                 .Match(
                     ex => Async<dynamic>(Exceptional(ex)),
                     u => next(Exceptional(u))
@@ -122,16 +123,71 @@ internal sealed class MiddlewareTests
         );
     }
 
+    [Test]
+    public async Task AsyncMiddleware_With_ExceptionalWithException_Should_Not_RunWholeMiddleware()
+    {
+        AsyncMiddleware<Exceptional<int>> mw0 = async (next) =>
+        {
+            _sideEffects.Add("Middleware0");
+
+            return await (await GetExceptionalWithExceptionAsync().ConfigureAwait(false))
+                .Match(
+                    ex => Async<dynamic>(ex),
+                    u => next(Exceptional(u))
+                ).ConfigureAwait(false);
+        };
+
+        AsyncMiddleware<Exceptional<int>> mw1 = async (next) =>
+        {
+            _sideEffects.Add("Middleware1");
+            return await next(Exceptional(FinishExceptionalValue)).ConfigureAwait(false);
+        };
+
+        (await mw0
+            .Bind(t => mw1)
+            .RunAsync()
+            .ConfigureAwait(false)
+        )
+        .Match(
+            ex => Assert.That(ex.Message, Is.EqualTo(TestErrorMessage)),
+            u => Assert.Fail()
+        );
+
+        Assert.That(
+            _sideEffects,
+            Is.EqualTo(
+                new List<string>
+                {
+                    "Middleware0"
+                }
+            )
+        );
+    }
+
     private async Task ExecuteAsync()
     {
         _sideEffects.Add("ExecuteAsync");
         await Task.CompletedTask.ConfigureAwait(false);
     }
 
-    private static async Task<Exceptional<int>> GetExceptionalAsync()
+    private static async Task<Exceptional<int>> GetExceptionalWithValueAsync()
     {
         await Task.Yield();
         return Exceptional(InitExceptionalValue);
+    }
+
+    private static async Task<Exceptional<int>> GetExceptionalWithExceptionAsync()
+    {
+        await Task.Yield();
+
+        try
+        {
+            throw new Exception(TestErrorMessage);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
     }
 
     private static Exceptional<RUnit> GetExceptional() => Exceptional(new RUnit());
