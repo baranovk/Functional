@@ -113,7 +113,14 @@ internal sealed class MiddlewareTests
         Assert.That(
             _sideEffects,
             Is.EqualTo(
-                new List<string> { "Middleware0", "Middleware1", "Middleware1 sw.Start", "ExecuteAsync", "Middleware1 sw.Stop" }
+                new List<string>
+                {
+                    "Middleware0",
+                    "Middleware1",
+                    "Middleware1 sw.Start",
+                    "ExecuteAsync",
+                    "Middleware1 sw.Stop"
+                }
             )
         );
     }
