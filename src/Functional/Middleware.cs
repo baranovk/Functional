@@ -10,7 +10,8 @@ public static class Middleware
 {
     public static T Run<T>(this Middleware<T> mw) => mw(t => t!);
 
-    public static async Task<T> RunAsync<T>(this AsyncMiddleware<T> mw) => await mw(t => Async<dynamic>(t!)).ConfigureAwait(false);
+    public static async Task<T> RunAsync<T>(this AsyncMiddleware<T> mw)
+        => await mw(t => Async<dynamic>(t!)).ConfigureAwait(false);
 
     public static Middleware<TR> Map<T, TR>
        (this Middleware<T> mw, Func<T, TR> f)
