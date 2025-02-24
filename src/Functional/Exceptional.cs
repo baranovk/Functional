@@ -33,6 +33,9 @@ public readonly struct Exceptional<T>
     public TR Match<TR>(Func<Exception, TR> Exception, Func<T, TR> Success)
        => IsException ? Exception(this.Exception!) : Success(Value!);
 
+    public Task<TR> Match<TR>(Func<Exception, Task<TR>> Exception, Func<T, Task<TR>> Success)
+       => IsException ? Exception(this.Exception!) : Success(Value!);
+
     public Unit Match(Action<Exception> Exception, Action<T> Success)
        => Match(Exception.ToFunc(), Success.ToFunc());
 
