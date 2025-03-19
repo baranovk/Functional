@@ -31,4 +31,19 @@ public static class Extensions
 
         return currentThis;
     }
+
+    public static async ValueTask<T> IterateUntilAsync<T>(
+        this ValueTask<T> @this,
+        Func<T, ValueTask<T>> update,
+        Func<T, bool> endCondition)
+    {
+        var currentThis = await @this.ConfigureAwait(false);
+
+        while (!endCondition(currentThis))
+        {
+            currentThis = await update(currentThis).ConfigureAwait(false);
+        }
+
+        return currentThis;
+    }
 }
