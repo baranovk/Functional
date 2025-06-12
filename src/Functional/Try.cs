@@ -1,15 +1,18 @@
-using static Functional.F;
+using Unit = System.ValueTuple;
 
 namespace Functional;
 
 public delegate Exceptional<T> Try<T>();
 public delegate Task<Exceptional<T>> AsyncTry<T>();
+public delegate Task<Exceptional<Unit>> AsyncTry();
 
 public static partial class F
 {
     public static Try<T> Try<T>(Func<T> f) => () => f();
 
     public static AsyncTry<T> TryAsync<T>(Func<Task<T>> f) => async () => await f().ConfigureAwait(false);
+
+    public static AsyncTry TryAsync(Func<Task> f) => async () => { await f().ConfigureAwait(false); return new Unit(); };
 }
 
 public static class TryExt
@@ -21,6 +24,12 @@ public static class TryExt
     }
 
     public static async Task<Exceptional<T>> RunAsync<T>(this AsyncTry<T> @try)
+    {
+        try { return await @try().ConfigureAwait(false); }
+        catch (Exception ex) { return ex; }
+    }
+
+    public static async Task<Exceptional<Unit>> RunAsync(this AsyncTry @try)
     {
         try { return await @try().ConfigureAwait(false); }
         catch (Exception ex) { return ex; }
@@ -58,7 +67,6 @@ public static class TryExt
        => await @try.RunAsync().Bind(t => f(t)).ConfigureAwait(false));
 
     // LINQ
-
     public static Try<TR> Select<T, TR>(this Try<T> @this, Func<T, TR> func) => @this.Map(func);
 
     public static Try<TRR> SelectMany<T, TR, TRR>
