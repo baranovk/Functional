@@ -1,18 +1,19 @@
+using System.Threading;
 using Unit = System.ValueTuple;
 
 namespace Functional;
 
 public delegate Exceptional<T> Try<T>();
-public delegate Task<Exceptional<T>> AsyncTry<T>();
-public delegate Task<Exceptional<Unit>> AsyncTry();
+public delegate Task<Exceptional<T>> AsyncTry<T>(CancellationToken cancellationToken);
+public delegate Task<Exceptional<Unit>> AsyncTry(CancellationToken cancellationToken);
 
 public static partial class F
 {
     public static Try<T> Try<T>(Func<T> f) => () => f();
 
-    public static AsyncTry<T> TryAsync<T>(Func<Task<T>> f) => async () => await f().ConfigureAwait(false);
+    public static AsyncTry<T> TryAsync<T>(Func<CancellationToken, Task<T>> f) => async ct => await f(ct).ConfigureAwait(false);
 
-    public static AsyncTry TryAsync(Func<Task> f) => async () => { await f().ConfigureAwait(false); return new Unit(); };
+    public static AsyncTry TryAsync(Func<CancellationToken, Task> f) => async ct => { await f(ct).ConfigureAwait(false); return new Unit(); };
 }
 
 public static class TryExt
@@ -23,15 +24,15 @@ public static class TryExt
         catch (Exception ex) { return ex; }
     }
 
-    public static async Task<Exceptional<T>> RunAsync<T>(this AsyncTry<T> @try)
+    public static async Task<Exceptional<T>> RunAsync<T>(this AsyncTry<T> @try, CancellationToken cancellationToken = default)
     {
-        try { return await @try().ConfigureAwait(false); }
+        try { return await @try(cancellationToken).ConfigureAwait(false); }
         catch (Exception ex) { return ex; }
     }
 
-    public static async Task<Exceptional<Unit>> RunAsync(this AsyncTry @try)
+    public static async Task<Exceptional<Unit>> RunAsync(this AsyncTry @try, CancellationToken cancellationToken = default)
     {
-        try { return await @try().ConfigureAwait(false); }
+        try { return await @try(cancellationToken).ConfigureAwait(false); }
         catch (Exception ex) { return ex; }
     }
 
@@ -56,15 +57,20 @@ public static class TryExt
              Success: t => f(t).Run()
           );
 
+    public static AsyncTry Bind
+       (this AsyncTry @try, Func<Exceptional<Unit>, CancellationToken, AsyncTry> f)
+       => async ct
+       => await @try.RunAsync(ct).Bind(t => f(t, ct).RunAsync(ct)).ConfigureAwait(false);
+
     public static AsyncTry<TR> Bind<T, TR>
-       (this AsyncTry<T> @try, Func<Exceptional<T>, AsyncTry<TR>> f)
-       => async ()
-       => await @try.RunAsync().Bind(t => f(t).RunAsync()).ConfigureAwait(false);
+       (this AsyncTry<T> @try, Func<Exceptional<T>, CancellationToken, AsyncTry<TR>> f)
+       => async ct
+       => await @try.RunAsync(ct).Bind(t => f(t, ct).RunAsync(ct)).ConfigureAwait(false);
 
     public static AsyncTry<TR> MapAsync<T, TR>
-       (this AsyncTry<T> @try, Func<Exceptional<T>, Task<TR>> f)
-       => (async ()
-       => await @try.RunAsync().Bind(t => f(t)).ConfigureAwait(false));
+       (this AsyncTry<T> @try, Func<Exceptional<T>, CancellationToken, Task<TR>> f, CancellationToken cancellationToken = default)
+       => async ct
+       => await @try.RunAsync(ct).Bind(t => f(t, ct)).ConfigureAwait(false);
 
     // LINQ
     public static Try<TR> Select<T, TR>(this Try<T> @this, Func<T, TR> func) => @this.Map(func);

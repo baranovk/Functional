@@ -106,6 +106,9 @@ public static class TaskExt
     public static async Task<TR> Bind<T, TR>(this Task<T> task, Func<T, Task<TR>> f)
         => await f(await task.ConfigureAwait(false)).ConfigureAwait(false);
 
+    public static async Task<TR> Bind<T, TR>(this Task<T> task, Func<T, CancellationToken, Task<TR>> f, CancellationToken cancellationToken = default)
+        => await f(await task.ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+
     public static Task<T> OrElse<T>
        (this Task<T> task, Func<Task<T>> fallback, CancellationToken cancellationToken = default)
        => task.ContinueWith(t =>
