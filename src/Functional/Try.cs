@@ -62,6 +62,11 @@ public static class TryExt
        => async ct
        => await @try.RunAsync(ct).Bind(t => f(t, ct).RunAsync(ct)).ConfigureAwait(false);
 
+    public static AsyncTry<T> Bind<T>
+       (this AsyncTry @try, Func<Exceptional<Unit>, CancellationToken, AsyncTry<T>> f)
+       => async ct
+       => await @try.RunAsync(ct).Bind(t => f(t, ct).RunAsync(ct)).ConfigureAwait(false);
+
     public static AsyncTry<TR> Bind<T, TR>
        (this AsyncTry<T> @try, Func<Exceptional<T>, CancellationToken, AsyncTry<TR>> f)
        => async ct
